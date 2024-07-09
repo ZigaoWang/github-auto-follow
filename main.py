@@ -40,6 +40,11 @@ load_dotenv()
 github_username = os.getenv("GITHUB_USERNAME")
 github_password = os.getenv("GITHUB_PASSWORD")
 
+# Prompt the user for the GitHub repository URL
+default_repo_url = "https://github.com/torvalds/linux"
+repo_url = input(f"Enter the GitHub repository URL (default {default_repo_url}): ").strip()
+repo_url = repo_url if repo_url else default_repo_url
+
 
 # Function to log in to GitHub
 def github_login(username, password):
@@ -58,7 +63,7 @@ def github_login(username, password):
 
 # Function to follow users on the stargazers page
 def follow_stargazers(page, delay):
-    driver.get(f"https://github.com/torvalds/linux/stargazers?page={page}")
+    driver.get(f"{repo_url}/stargazers?page={page}")
     time.sleep(3)
 
     # Find all follow buttons on the page
