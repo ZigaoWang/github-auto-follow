@@ -4,6 +4,7 @@ import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
+import threading
 
 # Logo and information
 logo = r"""
@@ -80,7 +81,7 @@ def follow_stargazers(page, delay, follow_count):
         except Exception as e:
             print(f"Error clicking follow button: {e}")
 
-    return len(follow_buttons), follow_count
+    return True, follow_count
 
 
 # Function to click a follow button with a delay and print user info
@@ -111,14 +112,14 @@ speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 if speed_mode == "fast":
     delay = 0.1
 elif speed_mode == "medium":
-    delay = 1
+    delay = 0.5
 elif speed_mode == "slow":
-    delay = 2
+    delay = 1
 elif speed_mode == "random":
-    delay = random.uniform(0.5, 3)
+    delay = random.uniform(0.1, 2)
 else:
     print("Invalid speed mode. Defaulting to random.")
-    delay = random.uniform(0.5, 3)
+    delay = random.uniform(0.1, 2)
 
 print("Starting now")
 
@@ -128,25 +129,38 @@ driver = webdriver.Chrome()
 # Log in to GitHub
 github_login(github_username, github_password)
 
+# Variable to control the stop command
+stop_thread = False
+
+# Function to listen for the stop command
+def listen_for_stop():
+    global stop_thread
+    while True:
+        if input().strip().lower() == "stop":
+            stop_thread = True
+            break
+
+# Start the stop command listener thread
+stop_listener = threading.Thread(target=listen_for_stop)
+stop_listener.start()
+
 # Loop through pages and follow stargazers
 page = start_page
 users_followed = 0
 follow_count = 0
+
 try:
-    while True:
+    while not stop_thread:
         followed_on_page, follow_count = follow_stargazers(page, delay, follow_count)
         if not followed_on_page:
-            print(f"No follow buttons found on page {page}. Moving to the next page.")
-        page += 1
-        # Check for stop command
-        if input().strip().lower() == "stop":
-            print("Stopping now")
+            print(f"No follow buttons found on page {page}. Exiting.")
             break
+        page += 1
 except KeyboardInterrupt:
     print("Program interrupted by user.")
 
 # Output the number of users followed
-print(f"Total users followed: {users_followed}")
+print(f"Total users followed: {follow_count}")
 
 # Close the browser
 driver.quit()
