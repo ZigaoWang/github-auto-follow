@@ -72,14 +72,8 @@ def follow_stargazers(page, delay):
     if not follow_buttons:
         return False  # No follow buttons found, likely end of pages
 
-    threads = []
     for button in follow_buttons:
-        thread = threading.Thread(target=click_follow_button, args=(button, delay))
-        threads.append(thread)
-        thread.start()
-
-    for thread in threads:
-        thread.join()
+        click_follow_button(button, delay)
 
     return len(follow_buttons)
 
@@ -100,19 +94,21 @@ default_speed_mode = "random"
 start_page_input = input(f"Enter the starting page (default {default_start_page}): ").strip()
 start_page = int(start_page_input) if start_page_input else default_start_page
 
-speed_mode_input = input(f"Enter speed mode (fast, medium, random) (default {default_speed_mode}): ").strip().lower()
+speed_mode_input = input(f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
 speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 
 # Set delay based on speed mode
 if speed_mode == "fast":
-    delay = 2  # 2 seconds
+    delay = 0.1
 elif speed_mode == "medium":
-    delay = 5  # 5 seconds
+    delay = 1
+elif speed_mode == "slow":
+    delay = 2
 elif speed_mode == "random":
-    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
+    delay = random.uniform(0.5, 3)
 else:
     print("Invalid speed mode. Defaulting to random.")
-    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
+    delay = random.uniform(0.5, 3)
 
 print("Starting now")
 
@@ -135,6 +131,7 @@ try:
             break
         # Check for stop command
         if input().strip().lower() == "stop":
+            print("Stopping now")
             break
 except KeyboardInterrupt:
     print("Program interrupted by user.")
