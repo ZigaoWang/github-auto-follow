@@ -1,5 +1,4 @@
 import os
-import threading
 import time
 import random
 from selenium import webdriver
@@ -62,7 +61,7 @@ def github_login(username, password):
 
 
 # Function to follow users on the stargazers page
-def follow_stargazers(page, delay):
+def follow_stargazers(page, delay, follow_count):
     driver.get(f"{repo_url}/stargazers?page={page}")
     time.sleep(3)
 
@@ -70,25 +69,31 @@ def follow_stargazers(page, delay):
     follow_buttons = driver.find_elements(By.XPATH, "//input[@type='submit' and @name='commit' and @value='Follow']")
 
     if not follow_buttons:
-        return False  # No follow buttons found, likely end of pages
+        return False, follow_count  # No follow buttons found, likely end of pages
 
     for button in follow_buttons:
-        parent_element = button.find_element(By.XPATH, "./ancestor::div[contains(@class, 'd-flex')]")
-        username_element = parent_element.find_element(By.XPATH, ".//a[contains(@data-hovercard-type, 'user')]")
-        username = username_element.get_attribute("href").split("/")[-1]
-        click_follow_button(button, delay, username)
+        try:
+            parent_element = button.find_element(By.XPATH, "./ancestor::div[contains(@class, 'd-flex')]")
+            username_element = parent_element.find_element(By.XPATH, ".//a[contains(@data-hovercard-type, 'user')]")
+            username = username_element.get_attribute("href").split("/")[-1]
+            follow_count = click_follow_button(button, delay, username, follow_count)
+        except Exception as e:
+            print(f"Error clicking follow button: {e}")
 
-    return len(follow_buttons)
+    return len(follow_buttons), follow_count
 
 
 # Function to click a follow button with a delay and print user info
-def click_follow_button(button, delay, username):
+def click_follow_button(button, delay, username, follow_count):
     try:
         button.click()
-        print(f"Followed {username}: https://github.com/{username}")
+        follow_count += 1
+        print(f"{follow_count}. Followed {username}: https://github.com/{username}")
         time.sleep(delay)
     except Exception as e:
         print(f"Error clicking follow button for {username}: {e}")
+
+    return follow_count
 
 
 # Prompt the user for the starting page and speed mode
@@ -98,7 +103,8 @@ default_speed_mode = "random"
 start_page_input = input(f"Enter the starting page (default {default_start_page}): ").strip()
 start_page = int(start_page_input) if start_page_input else default_start_page
 
-speed_mode_input = input(f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
+speed_mode_input = input(
+    f"Enter speed mode (fast, medium, slow, random) (default {default_speed_mode}): ").strip().lower()
 speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 
 # Set delay based on speed mode
@@ -125,14 +131,13 @@ github_login(github_username, github_password)
 # Loop through pages and follow stargazers
 page = start_page
 users_followed = 0
+follow_count = 0
 try:
     while True:
-        followed_on_page = follow_stargazers(page, delay)
-        if followed_on_page:
-            users_followed += followed_on_page
-            page += 1
-        else:
-            break
+        followed_on_page, follow_count = follow_stargazers(page, delay, follow_count)
+        if not followed_on_page:
+            print(f"No follow buttons found on page {page}. Moving to the next page.")
+        page += 1
         # Check for stop command
         if input().strip().lower() == "stop":
             print("Stopping now")
