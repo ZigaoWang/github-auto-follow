@@ -76,7 +76,7 @@ def follow_stargazers(page, delay):
     for thread in threads:
         thread.join()
 
-    return True
+    return len(follow_buttons)
 
 
 # Function to click a follow button with a delay
@@ -89,19 +89,25 @@ def click_follow_button(button, delay):
 
 
 # Prompt the user for the starting page and speed mode
-start_page = int(input("Enter the starting page: "))
-speed_mode = input("Enter speed mode (fast, medium, random): ").strip().lower()
+default_start_page = 1
+default_speed_mode = "random"
+
+start_page_input = input(f"Enter the starting page (default {default_start_page}): ").strip()
+start_page = int(start_page_input) if start_page_input else default_start_page
+
+speed_mode_input = input(f"Enter speed mode (fast, medium, random) (default {default_speed_mode}): ").strip().lower()
+speed_mode = speed_mode_input if speed_mode_input else default_speed_mode
 
 # Set delay based on speed mode
 if speed_mode == "fast":
-    delay = 0.1
+    delay = 2  # 2 seconds
 elif speed_mode == "medium":
-    delay = 1
+    delay = 5  # 5 seconds
 elif speed_mode == "random":
-    delay = random.uniform(1, 3)
+    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
 else:
     print("Invalid speed mode. Defaulting to random.")
-    delay = random.uniform(1, 3)
+    delay = random.uniform(5, 10)  # Random delay between 5 and 10 seconds
 
 print("Starting now")
 
@@ -116,8 +122,9 @@ page = start_page
 users_followed = 0
 try:
     while True:
-        if follow_stargazers(page, delay):
-            users_followed += 1
+        followed_on_page = follow_stargazers(page, delay)
+        if followed_on_page:
+            users_followed += followed_on_page
             page += 1
         else:
             break
