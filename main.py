@@ -73,18 +73,22 @@ def follow_stargazers(page, delay):
         return False  # No follow buttons found, likely end of pages
 
     for button in follow_buttons:
-        click_follow_button(button, delay)
+        parent_element = button.find_element(By.XPATH, "./ancestor::div[contains(@class, 'd-flex')]")
+        username_element = parent_element.find_element(By.XPATH, ".//a[contains(@data-hovercard-type, 'user')]")
+        username = username_element.get_attribute("href").split("/")[-1]
+        click_follow_button(button, delay, username)
 
     return len(follow_buttons)
 
 
-# Function to click a follow button with a delay
-def click_follow_button(button, delay):
+# Function to click a follow button with a delay and print user info
+def click_follow_button(button, delay, username):
     try:
         button.click()
+        print(f"Followed {username}: https://github.com/{username}")
         time.sleep(delay)
     except Exception as e:
-        print(f"Error clicking follow button: {e}")
+        print(f"Error clicking follow button for {username}: {e}")
 
 
 # Prompt the user for the starting page and speed mode
