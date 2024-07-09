@@ -1,4 +1,5 @@
 import os
+import threading
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
@@ -14,6 +15,7 @@ github_password = os.getenv("GITHUB_PASSWORD")
 # Create a new Chrome session
 driver = webdriver.Chrome()
 
+
 # Function to log in to GitHub
 def github_login(username, password):
     driver.get("https://github.com/login")
@@ -28,24 +30,45 @@ def github_login(username, password):
     sign_in_button.click()
     time.sleep(2)
 
+
 # Function to follow users on the stargazers page
-def follow_stargazers():
-    driver.get("https://github.com/torvalds/linux/stargazers")
+def follow_stargazers(page):
+    driver.get(f"https://github.com/torvalds/linux/stargazers?page={page}")
     time.sleep(3)
 
     # Find all follow buttons on the page
     follow_buttons = driver.find_elements(By.XPATH, "//input[@type='submit' and @name='commit' and @value='Follow']")
 
-    for button in follow_buttons:
-        try:
-            button.click()
-            time.sleep(1)  # Wait a bit between clicks to avoid being flagged as a bot
-        except Exception as e:
-            print(f"Error clicking follow button: {e}")
+    if not follow_buttons:
+        return False  # No follow buttons found, likely end of pages
 
-# Log in to GitHub and follow stargazers
+    threads = []
+    for button in follow_buttons:
+        thread = threading.Thread(target=click_follow_button, args=(button,))
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    return True
+
+
+# Function to click a follow button
+def click_follow_button(button):
+    try:
+        button.click()
+    except Exception as e:
+        print(f"Error clicking follow button: {e}")
+
+
+# Log in to GitHub
 github_login(github_username, github_password)
-follow_stargazers()
+
+# Loop through pages and follow stargazers
+page = 1
+while follow_stargazers(page):
+    page += 1
 
 # Close the browser
 driver.quit()
