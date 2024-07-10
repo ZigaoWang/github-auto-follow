@@ -79,14 +79,14 @@ def set_delay(speed_mode):
     if speed_mode == "fast":
         return 0.1
     elif speed_mode == "medium":
-        return 0.5
-    elif speed_mode == "slow":
         return 1
+    elif speed_mode == "slow":
+        return 5
     elif speed_mode == "random":
-        return random.uniform(0.1, 2)
+        return random.uniform(0.1, 10)
     else:
         logging.warning("Invalid speed mode. Defaulting to random.")
-        return random.uniform(0.1, 2)
+        return random.uniform(0.1, 10)
 
 
 def github_login(driver, username, password):
