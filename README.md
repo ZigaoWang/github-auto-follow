@@ -2,14 +2,15 @@
 
 ## Description
 
-GitHub Auto Follow is a script that automatically follows users who have starred a specified GitHub repository. **Use this script for educational purposes only.** Note that this script may violate GitHub's community guidelines.
+GitHub Auto Follow is a script that automatically follows users who have starred a specified GitHub repository. Uses the GitHub REST API with a personal access token — no browser required. **Use this script for educational purposes only.** Note that this script may violate GitHub's community guidelines.
 
 ## Features
 
 - Automatically follows users who starred a specified GitHub repository.
+- Uses GitHub REST API (no browser, no Selenium).
 - Configurable speed mode (fast, medium, slow, random).
 - Resumable from a specified starting page.
-- Uses environment variables for secure credential management.
+- Uses environment variables for secure token management.
 
 ## Disclaimer
 
@@ -37,12 +38,13 @@ GitHub Auto Follow is a script that automatically follows users who have starred
     pip install -r requirements.txt
     ```
 
-4. Create a `.env` file in the root directory and add your GitHub credentials:
+4. Create a `.env` file in the root directory and add your GitHub personal access token:
 
     ```plaintext
-    GITHUB_USERNAME=your_github_username
-    GITHUB_PASSWORD=your_github_password
+    GITHUB_TOKEN=your_github_personal_access_token
     ```
+
+    You can generate a token at [github.com/settings/tokens](https://github.com/settings/tokens). The token needs the `user` scope to follow users.
 
 ## Usage
 
@@ -77,9 +79,12 @@ To stop the script at any time, type 'stop' in the terminal.
 --------------------------------------------------
 Type 'agree' to continue: agree
 Enter the GitHub repository URL (default https://github.com/torvalds/linux): 
-Enter the starting page (default 1): 11
+Enter the starting page (default 1): 1
 Enter speed mode (fast, medium, slow, random) (default random): medium
-Starting now
+Targeting torvalds/linux | Starting at page 1 | Speed: medium
+...
+1. Followed user1: https://github.com/user1
+2. Followed user2: https://github.com/user2
 ...
 ```
 
