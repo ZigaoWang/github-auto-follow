@@ -78,7 +78,7 @@ def parse_repo_url(repo_url):
         logging.error(f"Invalid GitHub repository URL: {repo_url}")
         exit(1)
     owner, repo = match.group(1), match.group(2)
-    repo = repo.rstrip(".git")
+    repo = repo.removesuffix(".git")
     return owner, repo
 
 
